@@ -1,0 +1,768 @@
+{
+  "info": {
+    "_postman_id": "a17cf852-bbde-47e1-962f-139132264637",
+    "name": "NexoraX E-Commerce API",
+    "description": "Complete API collection for NexoraX E-Commerce Backend\n\n**Features:**\n- Authentication (Register, Login, Get Profile)\n- Products Management (CRUD operations)\n- Shopping Cart Management\n\n**Setup:**\n1. Set your BASE_URL in environment variables (default: http://localhost:5000)\n2. Register/Login to get AUTH_TOKEN (automatically saved)\n3. Admin users can manage products\n4. All users can manage their cart",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "40773299"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.token) {",
+                  "        pm.environment.set('AUTH_TOKEN', response.data.token);",
+                  "        pm.environment.set('USER_ID', response.data._id);",
+                  "        console.log('✅ Token saved to environment');",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\",\n    \"role\": \"user\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/auth/register",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Register a new user account.\n\n**Request Body:**\n- `name` (required): User's full name\n- `email` (required): Valid email address\n- `password` (required): Password\n- `role` (optional): \"user\" or \"admin\" (defaults to \"user\")\n\n**Response:**\nReturns user data with JWT token"
+          },
+          "response": []
+        },
+        {
+          "name": "Register Admin User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.token) {",
+                  "        pm.environment.set('AUTH_TOKEN', response.data.token);",
+                  "        pm.environment.set('ADMIN_USER_ID', response.data._id);",
+                  "        console.log('✅ Admin token saved to environment');",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Admin User\",\n    \"email\": \"admin@example.com\",\n    \"password\": \"admin123\",\n    \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/auth/register",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Register a new admin user account (use this to test admin-only routes)"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.token) {",
+                  "        pm.environment.set('AUTH_TOKEN', response.data.token);",
+                  "        pm.environment.set('USER_ID', response.data._id);",
+                  "        console.log('✅ Login successful - Token saved');",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/auth/login",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login with email and password.\n\n**Request Body:**\n- `email` (required): User's email\n- `password` (required): User's password\n\n**Response:**\nReturns user data with JWT token (automatically saved to environment)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/auth/me",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Get currently logged-in user's profile information.\n\n**Authentication:** Required (Bearer Token)\n\n**Response:**\nReturns user profile data"
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication endpoints for user registration, login, and profile management"
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Public Routes",
+          "item": [
+            {
+              "name": "Get All Products",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/products?page=1&limit=10",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "products"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number (default: 1)"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10",
+                      "description": "Items per page (default: 10)"
+                    },
+                    {
+                      "key": "search",
+                      "value": "laptop",
+                      "description": "Search by product name",
+                      "disabled": true
+                    },
+                    {
+                      "key": "category",
+                      "value": "electronics",
+                      "description": "Filter by category",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Get all products with pagination and optional filters.\n\n**Query Parameters:**\n- `page`: Page number (default: 1)\n- `limit`: Items per page (default: 10)\n- `search`: Search by product name (case-insensitive)\n- `category`: Filter by category\n\n**No authentication required**"
+              },
+              "response": []
+            },
+            {
+              "name": "Search Products",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/products?search=laptop&page=1&limit=10",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "products"
+                  ],
+                  "query": [
+                    {
+                      "key": "search",
+                      "value": "laptop"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    }
+                  ]
+                },
+                "description": "Search products by name"
+              },
+              "response": []
+            },
+            {
+              "name": "Filter by Category",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/products?category=electronics",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "products"
+                  ],
+                  "query": [
+                    {
+                      "key": "category",
+                      "value": "electronics"
+                    }
+                  ]
+                },
+                "description": "Filter products by category"
+              },
+              "response": []
+            },
+            {
+              "name": "Get Product by ID",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    const response = pm.response.json();",
+                      "    if (response.data && response.data._id) {",
+                      "        pm.environment.set('PRODUCT_ID', response.data._id);",
+                      "        console.log('✅ Product ID saved to environment');",
+                      "    }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/products/{{PRODUCT_ID}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "products",
+                    "{{PRODUCT_ID}}"
+                  ]
+                },
+                "description": "Get detailed information about a specific product.\n\n**Path Parameter:**\n- `id`: Product ID\n\n**No authentication required**"
+              },
+              "response": []
+            }
+          ],
+          "description": "Public product endpoints (no authentication required)"
+        },
+        {
+          "name": "Admin Routes",
+          "item": [
+            {
+              "name": "Add Product",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    const response = pm.response.json();",
+                      "    if (response.data && response.data._id) {",
+                      "        pm.environment.set('PRODUCT_ID', response.data._id);",
+                      "        console.log('✅ New Product ID saved to environment');",
+                      "    }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{AUTH_TOKEN}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "name",
+                      "value": "Apple MacBook Pro 16\"",
+                      "type": "text"
+                    },
+                    {
+                      "key": "description",
+                      "value": "Powerful laptop with M2 Pro chip, 16GB RAM, 512GB SSD",
+                      "type": "text"
+                    },
+                    {
+                      "key": "price",
+                      "value": "2499",
+                      "type": "text"
+                    },
+                    {
+                      "key": "category",
+                      "value": "electronics",
+                      "type": "text"
+                    },
+                    {
+                      "key": "stock",
+                      "value": "50",
+                      "type": "text"
+                    },
+                    {
+                      "key": "image",
+                      "type": "file",
+                      "description": "Upload product image file",
+                      "value": null
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/products",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "products"
+                  ]
+                },
+                "description": "Add a new product (Admin only).\n\n**Authentication:** Required (Bearer Token + Admin role)\n\n**Form Data:**\n- `name` (required): Product name\n- `description` (required): Product description\n- `price` (required): Product price\n- `category` (required): Product category\n- `stock` (optional): Available stock (default: 0)\n- `image` (required): Product image file\n\n**Note:** Image is uploaded to Cloudinary"
+              },
+              "response": []
+            },
+            {
+              "name": "Update Product",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{AUTH_TOKEN}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "name",
+                      "value": "Apple MacBook Pro 16\" (Updated)",
+                      "type": "text",
+                      "description": "Optional"
+                    },
+                    {
+                      "key": "description",
+                      "value": "Updated description",
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "price",
+                      "value": "2399",
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "category",
+                      "value": "electronics",
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "stock",
+                      "value": "45",
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "image",
+                      "type": "file",
+                      "description": "Optional - Upload new image",
+                      "value": null,
+                      "disabled": true
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/products/{{PRODUCT_ID}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "products",
+                    "{{PRODUCT_ID}}"
+                  ]
+                },
+                "description": "Update an existing product (Admin only).\n\n**Authentication:** Required (Bearer Token + Admin role)\n\n**Path Parameter:**\n- `id`: Product ID to update\n\n**Form Data (all optional):**\n- `name`: Updated product name\n- `description`: Updated description\n- `price`: Updated price\n- `category`: Updated category\n- `stock`: Updated stock\n- `image`: New image file (replaces old one)\n\n**Note:** Old image is deleted from Cloudinary if new one is uploaded"
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Product",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{AUTH_TOKEN}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/products/{{PRODUCT_ID}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "products",
+                    "{{PRODUCT_ID}}"
+                  ]
+                },
+                "description": "Delete a product (Admin only).\n\n**Authentication:** Required (Bearer Token + Admin role)\n\n**Path Parameter:**\n- `id`: Product ID to delete\n\n**Note:** Product image is also deleted from Cloudinary"
+              },
+              "response": []
+            }
+          ],
+          "description": "Admin-only product management endpoints (requires authentication + admin role)"
+        }
+      ],
+      "description": "Product management endpoints - includes public routes and admin-only routes"
+    },
+    {
+      "name": "Shopping Cart",
+      "item": [
+        {
+          "name": "Get My Cart",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/cart",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "cart"
+              ]
+            },
+            "description": "Get current user's shopping cart with populated product details.\n\n**Authentication:** Required (Bearer Token)\n\n**Response:**\nReturns cart items with product details, quantities, and prices"
+          },
+          "response": []
+        },
+        {
+          "name": "Add to Cart",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"productId\": \"{{PRODUCT_ID}}\",\n    \"quantity\": 2\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/cart/add",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "cart",
+                "add"
+              ]
+            },
+            "description": "Add a product to cart or increase quantity if already exists.\n\n**Authentication:** Required (Bearer Token)\n\n**Request Body:**\n- `productId` (required): ID of the product to add\n- `quantity` (optional): Quantity to add (default: 1)\n\n**Validations:**\n- Product must exist\n- Sufficient stock must be available\n- Quantity must be positive"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Cart Item Quantity",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"quantity\": 5\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/cart/update/{{PRODUCT_ID}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "cart",
+                "update",
+                "{{PRODUCT_ID}}"
+              ]
+            },
+            "description": "Update the quantity of a specific product in cart.\n\n**Authentication:** Required (Bearer Token)\n\n**Path Parameter:**\n- `productId`: ID of the product to update\n\n**Request Body:**\n- `quantity` (required): New quantity (must be positive)\n\n**Validations:**\n- Product must exist in cart\n- Sufficient stock must be available"
+          },
+          "response": []
+        },
+        {
+          "name": "Remove from Cart",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/cart/remove/{{PRODUCT_ID}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "cart",
+                "remove",
+                "{{PRODUCT_ID}}"
+              ]
+            },
+            "description": "Remove a specific product from cart.\n\n**Authentication:** Required (Bearer Token)\n\n**Path Parameter:**\n- `productId`: ID of the product to remove\n\n**Response:**\nReturns updated cart"
+          },
+          "response": []
+        },
+        {
+          "name": "Clear Cart",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/cart/clear",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "cart",
+                "clear"
+              ]
+            },
+            "description": "Clear all items from cart.\n\n**Authentication:** Required (Bearer Token)\n\n**Response:**\nReturns empty cart"
+          },
+          "response": []
+        }
+      ],
+      "description": "Shopping cart management endpoints (all require authentication)"
+    },
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{BASE_URL}}/",
+          "host": [
+            "{{BASE_URL}}"
+          ],
+          "path": [
+            ""
+          ]
+        },
+        "description": "Health check endpoint to verify API is running.\n\n**No authentication required**"
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "AUTH_TOKEN",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "USER_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "PRODUCT_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ADMIN_USER_ID",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
