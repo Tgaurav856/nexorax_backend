@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const Product = require("../models/Product");
+const { cloudinary } = require("../config/cloudinary");
 
 // ─────────────────────────────────────────────────────────────
 // @desc    Add a new product
@@ -14,12 +15,21 @@ const addProduct = asyncHandler(async (req, res) => {
     throw new Error("Please provide all required product fields.");
   }
 
+  if (!req.file) {
+    res.status(400);
+    throw new Error("Product image is required.");
+  }
+
   const product = await Product.create({
     name,
     description,
     price: Number(price),
     category: category.toLowerCase(),
     stock: Number(stock) || 0,
+    image: {
+      url: req.file.path,           // Cloudinary secure URL
+      publicId: req.file.filename,  // Cloudinary public_id for deletion
+    },
     createdBy: req.user._id,
   });
 
@@ -44,6 +54,17 @@ const updateProduct = asyncHandler(async (req, res) => {
   }
 
   const { name, description, price, category, stock } = req.body;
+
+  // If a new image is uploaded, delete the old one from Cloudinary
+  if (req.file) {
+    if (product.image?.publicId) {
+      await cloudinary.uploader.destroy(product.image.publicId);
+    }
+    product.image = {
+      url: req.file.path,
+      publicId: req.file.filename,
+    };
+  }
 
   product.name = name || product.name;
   product.description = description || product.description;
@@ -73,7 +94,10 @@ const deleteProduct = asyncHandler(async (req, res) => {
     throw new Error("Product not found.");
   }
 
-
+  // Remove image from Cloudinary
+  if (product.image?.publicId) {
+    await cloudinary.uploader.destroy(product.image.publicId);
+  }
 
   await product.deleteOne();
 
