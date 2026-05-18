@@ -8,15 +8,15 @@ const {
   getProductById,
 } = require("../controllers/productController");
 const { protect, adminOnly } = require("../middleware/authMiddleware");
-
+const { upload } = require("../config/cloudinary");
 
 // Public routes
 router.get("/", getProducts);
 router.get("/:id", getProductById);
 
 // Admin-only routes
-router.post("/", protect, adminOnly,  addProduct);
-router.put("/:id", protect, adminOnly, updateProduct);
+router.post("/", protect, adminOnly, upload.single("image"), addProduct);
+router.put("/:id", protect, adminOnly, upload.single("image"), updateProduct);
 router.delete("/:id", protect, adminOnly, deleteProduct);
 
 module.exports = router;
