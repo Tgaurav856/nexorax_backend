@@ -32,6 +32,15 @@ const productSchema = new mongoose.Schema(
       min: [0, "Stock cannot be negative"],
       default: 0,
     },
+    image: {
+      url: {
+        type: String,
+        required: [true, "Product image is required"],
+      },
+      publicId: {
+        type: String, // Used to delete image from Cloudinary
+      },
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
